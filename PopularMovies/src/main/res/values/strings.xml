@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="most_popular">Most Popular</string>
+    <string name="highest_rated">Highest Rated</string>
+    <string name="playtrailer">Play Trailer</string>
+    <string name="tap_to_see_details">Tap to see details</string>
+    <string name="mark_as_favorite">MARK AS FAVORITE</string>
+    <string name="trailers">Trailers:</string>
+    <string name="trailer1">Trailer1</string>
+    <string name="trailer2">Trailer2</string>
+    <string name="check_network_connection">Check your network connection</string>
+</resources>

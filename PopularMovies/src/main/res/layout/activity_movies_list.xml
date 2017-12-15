@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true"
+tools:context="com.example.ayogeshwaran.popularmovies.MoviesListActivity">
+
+<android.support.v7.widget.RecyclerView
+    android:id="@+id/recyclerview_movies"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+
+<ProgressBar
+    android:id="@+id/loading_indicator"
+    android:layout_width="42dp"
+    android:layout_height="42dp"
+    android:layout_gravity="center"
+    android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/network_connection_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/check_network_connection"
+        android:textSize="18sp"
+        android:visibility="invisible" />
+
+</merge>
