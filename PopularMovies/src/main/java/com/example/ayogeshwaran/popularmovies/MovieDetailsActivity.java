@@ -10,21 +10,30 @@ import android.widget.TextView;
 import com.example.ayogeshwaran.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.BindView;
+
 /**
  * Created by ayogeshwaran on 11/12/17.
  */
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
-    private TextView title;
+    @BindView(R.id.title_textview)
+    TextView title;
 
-    private ImageView poster;
+    @BindView(R.id.poster_imageview)
+    ImageView poster;
 
-    private TextView year;
+    @BindView(R.id.year_textView)
+    TextView year;
 
-    private TextView rating;
+    @BindView(R.id.rating_textView)
+    TextView rating;
 
-    private TextView description;
+    @BindView(R.id.description_textView)
+    TextView description;
 
     private final int max_rating = 10;
 
@@ -33,19 +42,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_movie_details);
+        ButterKnife.bind(this);
 
         Movies movie = getIntent().getParcelableExtra("parcel_data");
-        intiViews();
         setValues(movie);
-    }
-
-    private void intiViews() {
-        title = (TextView) findViewById(R.id.title_textview);
-        poster = (ImageView) findViewById(R.id.poster_imageview);
-        year = (TextView) findViewById(R.id.year_textView);
-        rating = (TextView) findViewById(R.id.rating_textView);
-        Button favorite = (Button) findViewById(R.id.favorite_button);
-        description = (TextView) findViewById(R.id.description_textView);
     }
 
     private void setValues(Movies movie) {

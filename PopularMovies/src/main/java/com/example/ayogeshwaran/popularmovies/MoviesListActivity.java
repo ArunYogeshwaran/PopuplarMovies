@@ -24,15 +24,21 @@ import org.json.JSONException;
 import java.net.URL;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MoviesListActivity extends AppCompatActivity implements
         MoviesAdapter.IMoviesAdapterClickHandler {
     private final String TAG = MoviesListActivity.class.getSimpleName();
 
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.recyclerview_movies)
+    RecyclerView mRecyclerView;
 
-    private ProgressBar mLoadingIndicator;
+    @BindView(R.id.loading_indicator)
+    ProgressBar mLoadingIndicator;
 
-    private TextView mNetworkConnectionTextView;
+    @BindView(R.id.network_connection_textview)
+    TextView mNetworkConnectionTextView;
 
     private MoviesAdapter mMoviesAdapter;
 
@@ -42,14 +48,11 @@ public class MoviesListActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movies_list);
+        ButterKnife.bind(this);
         intiViews();
     }
 
     private void intiViews() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
-        mNetworkConnectionTextView = (TextView) findViewById(R.id.network_connection_textview);
-
         RecyclerView.LayoutManager gridLayoutManager =
                 new GridLayoutManager(getApplicationContext(),2);
 
