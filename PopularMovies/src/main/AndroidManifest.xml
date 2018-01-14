@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <!--Look at the "README.md" file to know how to get the api key-->
-        <meta-data android:name="api_key" android:value="***********" />
+        <meta-data android:name="api_key" android:value="******" />
 
         <activity android:name=".MoviesListActivity">
             <intent-filter>
@@ -29,6 +29,12 @@
             android:label="MovieDetail">
 
         </activity>
+
+        <provider
+            android:name=".data.MoviesProvider"
+            android:authorities="com.example.ayogeshwaran.popularmovies"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

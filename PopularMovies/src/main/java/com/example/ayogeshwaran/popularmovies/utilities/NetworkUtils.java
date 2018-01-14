@@ -36,6 +36,10 @@ public final class NetworkUtils {
 
     private static final String MOVIE_DB_BASE_URL = "https://api.themoviedb.org/3/movie";
 
+    private static final String MOVIE_DB_VIDEO_URL = "https://api.themoviedb.org/3/movie/{id}/videos";
+
+    private static final String MOVIE_DB_REVIEWS_URL = "https://api.themoviedb.org/3/movie/{id}/reviews";
+
     public static URL buildURL(String sortOrder, Context context) {
         Uri builtUri = null;
         switch (sortOrder) {

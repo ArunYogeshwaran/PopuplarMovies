@@ -9,4 +9,6 @@
     <string name="trailer1">Trailer1</string>
     <string name="trailer2">Trailer2</string>
     <string name="check_network_connection">Check your network connection</string>
+    <string name="no_favorites">No favorites</string>
+    <string name="favorite">Favorite</string>
 </resources>
