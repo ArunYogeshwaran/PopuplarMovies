@@ -34,11 +34,15 @@ public final class NetworkUtils {
 
     public static final String TOP_RATED = "top_rated";
 
+    private static final String VIDEOS = "videos";
+
+    private static final String REVIEWS = "reviews";
+
     private static final String MOVIE_DB_BASE_URL = "https://api.themoviedb.org/3/movie";
 
-    private static final String MOVIE_DB_VIDEO_URL = "https://api.themoviedb.org/3/movie/{id}/videos";
+    private static final String YOUTUBE_THUMBNAIL_BASE_URL = "http://img.youtube.com/vi";
 
-    private static final String MOVIE_DB_REVIEWS_URL = "https://api.themoviedb.org/3/movie/{id}/reviews";
+    private static final String YOUTUBE_THUMBNAIL_RESOLUTION = "hqdefault.jpg";
 
     public static URL buildURL(String sortOrder, Context context) {
         Uri builtUri = null;
@@ -71,6 +75,26 @@ public final class NetworkUtils {
         return moviesQueryUrl;
     }
 
+    public static String buildYoutubeURL(String videoKey) {
+        Uri builtUri = null;
+
+        builtUri = Uri.parse(YOUTUBE_THUMBNAIL_BASE_URL).buildUpon()
+                .appendPath(videoKey)
+                .appendPath(YOUTUBE_THUMBNAIL_RESOLUTION)
+                .build();
+
+        URL videoUrl = null;
+        try {
+            if (builtUri != null) {
+                videoUrl = new URL(builtUri.toString());
+            }
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+
+        return videoUrl.toString();
+    }
+
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
@@ -99,7 +123,7 @@ public final class NetworkUtils {
         return null;
     }
 
-    public static String getFullPosterUrl(String posterPath) {
+    public static String getPosterUrl(String posterPath) {
         Uri fullUri = Uri.parse(MOVIE_POSTER_BASE_URL).buildUpon()
                 .appendPath(MOVIE_POSTER_SIZE_W185)
                 .appendPath("/" + posterPath)
@@ -124,6 +148,39 @@ public final class NetworkUtils {
         return result;
     }
 
+    public static URL getReviewsUrl(Integer movieId, Context context) {
+        Uri fullUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
+                .appendPath(String.valueOf(movieId))
+                .appendPath(REVIEWS)
+                .appendQueryParameter(API_KEY, getMetadata(context))
+                .build();
+
+        URL fullUrl = null;
+        try {
+            fullUrl = new URL(fullUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return fullUrl;
+    }
+
+    public static URL getVideosUrl(Integer movieId, Context context) {
+        Uri fullUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
+                .appendPath(String.valueOf(movieId))
+                .appendPath(VIDEOS)
+                .appendQueryParameter(API_KEY, getMetadata(context))
+                .build();
+
+        URL fullUrl = null;
+        try {
+            fullUrl = new URL(fullUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return fullUrl;
+    }
 
     public static boolean isOnline(Context context) {
         ConnectivityManager cm =

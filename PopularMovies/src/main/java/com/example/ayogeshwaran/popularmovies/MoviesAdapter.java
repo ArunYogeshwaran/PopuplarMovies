@@ -53,7 +53,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
         if (mMovies != null) {
             posterPath = mMovies.get(position).getPosterPath();
-            posterPath = NetworkUtils.getFullPosterUrl(posterPath);
+            posterPath = NetworkUtils.getPosterUrl(posterPath);
             Picasso.with(mContext).load
                     (posterPath).into(holder.moviePoster);
         }

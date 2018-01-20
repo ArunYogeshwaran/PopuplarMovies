@@ -1,8 +1,13 @@
 package com.example.ayogeshwaran.popularmovies;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ayogeshwaran.popularmovies.data.MoviesContract;
 import com.example.ayogeshwaran.popularmovies.utilities.MovieJsonUtils;
@@ -39,10 +45,12 @@ public class MoviesListActivity extends AppCompatActivity implements
     private static final int ID_MOVIE_LOADER = 33;
     private static final String LIST_STATE_KEY = "list_state_key";
 
+    private static boolean FAVORITE_VIEW = false;
+
     private final String TAG = MoviesListActivity.class.getSimpleName();
 
     @BindView(R.id.recyclerview_movies)
-    RecyclerView mRecyclerView;
+    RecyclerView moviesRecyclerView;
 
     @BindView(R.id.loading_indicator)
     ProgressBar mLoadingIndicator;
@@ -56,7 +64,7 @@ public class MoviesListActivity extends AppCompatActivity implements
 
     private int mPosition = RecyclerView.NO_POSITION;
 
-    Parcelable mListState;
+    private Parcelable mListState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,19 +72,47 @@ public class MoviesListActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_movies_list);
         ButterKnife.bind(this);
         intiViews();
+
+        this.registerReceiver(mConnReceiver, new IntentFilter(
+                ConnectivityManager.CONNECTIVITY_ACTION));
     }
+
+    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            NetworkInfo currentNetworkInfo = intent
+                    .getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+
+            if (currentNetworkInfo.isConnected()) {
+                if (moviesRecyclerView.getVisibility() == View.INVISIBLE) {
+                    loadMoviesList(NetworkUtils.POPULAR);
+                }
+            } else {
+                if (mErrorTextView.getVisibility() == View.INVISIBLE) {
+                    Toast.makeText(getApplicationContext(), R.string.connection_lost,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mConnReceiver);
+        super.onDestroy();
+    }
+
 
     private void intiViews() {
         RecyclerView.LayoutManager gridLayoutManager =
-                new GridLayoutManager(getApplicationContext(),2);
+                new GridLayoutManager(getApplicationContext(),getSpanCount(getApplicationContext()));
 
-        mRecyclerView.setLayoutManager(gridLayoutManager);
+        moviesRecyclerView.setLayoutManager(gridLayoutManager);
 
         mMoviesAdapter = new MoviesAdapter(this, this);
 
-        mRecyclerView.setAdapter(mMoviesAdapter);
+        moviesRecyclerView.setAdapter(mMoviesAdapter);
 
-        mRecyclerView.setHasFixedSize(true);
+        moviesRecyclerView.setHasFixedSize(true);
 
         showLoading();
 
@@ -100,19 +136,20 @@ public class MoviesListActivity extends AppCompatActivity implements
             }
         } else {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            moviesRecyclerView.setVisibility(View.INVISIBLE);
             mErrorTextView.setText(getString(R.string.check_network_connection));
             mErrorTextView.setVisibility(View.VISIBLE);
         }
     }
 
     private void showLoading() {
-        mRecyclerView.setVisibility(View.INVISIBLE);
+        moviesRecyclerView.setVisibility(View.INVISIBLE);
         mLoadingIndicator.setVisibility(View.VISIBLE);
     }
 
     private void showMovieListView() {
-        mRecyclerView.setVisibility(View.VISIBLE);
+        moviesRecyclerView.setVisibility(View.VISIBLE);
+        moviesRecyclerView.smoothScrollToPosition(0);
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         mErrorTextView.setVisibility(View.INVISIBLE);
     }
@@ -129,12 +166,15 @@ public class MoviesListActivity extends AppCompatActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.most_popular:
+                FAVORITE_VIEW = false;
                 loadMoviesList(NetworkUtils.POPULAR);
                 return true;
             case R.id.highest_rated:
+                FAVORITE_VIEW = false;
                 loadMoviesList(NetworkUtils.TOP_RATED);
                 return true;
             case R.id.favorite:
+                FAVORITE_VIEW = true;
                 getFavoritesFromDb();
                 return true;
 
@@ -170,7 +210,7 @@ public class MoviesListActivity extends AppCompatActivity implements
         super.onSaveInstanceState(state);
 
         // Save list state
-        mListState = mRecyclerView.getLayoutManager().onSaveInstanceState();
+        mListState = moviesRecyclerView.getLayoutManager().onSaveInstanceState();
         state.putParcelable(LIST_STATE_KEY, mListState);
     }
 
@@ -188,12 +228,16 @@ public class MoviesListActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         if (mListState != null) {
-            mRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+            moviesRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (!FAVORITE_VIEW) {
+            return;
+        }
+
         mLoadingIndicator.setVisibility(View.INVISIBLE);
 
         if (cursor.getCount() != 0) {
@@ -201,13 +245,18 @@ public class MoviesListActivity extends AppCompatActivity implements
             showMovieListView();
             mMoviesAdapter.setMoviesData(mMovies);
             if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-            mRecyclerView.smoothScrollToPosition(mPosition);
+            moviesRecyclerView.smoothScrollToPosition(mPosition);
         } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            moviesRecyclerView.setVisibility(View.INVISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             mErrorTextView.setText(getString(R.string.no_favorites));
             mErrorTextView.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMoviesAdapter.setMoviesData(null);
     }
 
     private void setMoviesFromCursor(Cursor cursor) {
@@ -224,6 +273,8 @@ public class MoviesListActivity extends AppCompatActivity implements
                         MoviesContract.MoviesEntry.COLUMN_MOVIE_ID)));
                 movie.setVoteCount(cursor.getInt(cursor.getColumnIndex(
                         MoviesContract.MoviesEntry.COLUMN_VOTE_COUNT)));
+                movie.setVoteAverage(cursor.getDouble(cursor.getColumnIndex(
+                        MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)));
                 movie.setVideo(Boolean.valueOf(cursor.getString(cursor.getColumnIndex(
                         MoviesContract.MoviesEntry.COLUMN_VIDEO))));
                 movie.setTitle(cursor.getString(cursor.getColumnIndex(
@@ -244,12 +295,6 @@ public class MoviesListActivity extends AppCompatActivity implements
                 mMovies.add(movie);
             } while (cursor.moveToNext());
         }
-        cursor.close();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mMoviesAdapter.setMoviesData(null);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -302,4 +347,9 @@ public class MoviesListActivity extends AppCompatActivity implements
         }
     }
 
+    private static int getSpanCount(Context context) {
+        float density = context.getResources().getDisplayMetrics().density;
+        float dpWidth = context.getResources().getDisplayMetrics().widthPixels / density;
+        return Math.round(dpWidth / 200);
+    }
 }

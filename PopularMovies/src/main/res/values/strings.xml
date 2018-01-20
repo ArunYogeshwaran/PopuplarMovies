@@ -2,13 +2,16 @@
     <string name="app_name">Popular Movies</string>
     <string name="most_popular">Most Popular</string>
     <string name="highest_rated">Highest Rated</string>
-    <string name="playtrailer">Play Trailer</string>
     <string name="tap_to_see_details">Tap to see details</string>
-    <string name="mark_as_favorite">MARK AS FAVORITE</string>
-    <string name="trailers">Trailers:</string>
-    <string name="trailer1">Trailer1</string>
-    <string name="trailer2">Trailer2</string>
     <string name="check_network_connection">Check your network connection</string>
     <string name="no_favorites">No favorites</string>
-    <string name="favorite">Favorite</string>
+    <string name="favorite">Favorites</string>
+    <string name="videos">Videos</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_reviews">No reviews for this movie</string>
+    <string name="no_videos">No videos for this movie</string>
+    <string name="connection_lost">Connectivity lost</string>
+    <string name="to_favorite">To Favorite</string>
+    <string name="to_play_video">To play video</string>
+    <string name="video_thumbnail">Video Thumbnail</string>
 </resources>

@@ -1,18 +1,19 @@
 package com.example.ayogeshwaran.popularmovies;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,42 +24,44 @@ import com.example.ayogeshwaran.popularmovies.utilities.NetworkUtils;
 
 import org.json.JSONException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ReviewsListActivity extends AppCompatActivity {
+public class VideosListActivity extends AppCompatActivity implements
+        VideosAdapter.IVideosAdapterClickHandler {
 
-    private static final String TAG = ReviewsListActivity.class.getSimpleName();
+    @BindView(R.id.videosRecyclerview)
+    RecyclerView videosRecyclerView;
 
-    @BindView(R.id.reviewsRecyclerview)
-    RecyclerView reviewsRecyclerView;
-
-    @BindView(R.id.reviews_loading_indicator)
+    @BindView(R.id.videos_loading_indicator)
     ProgressBar mLoadingIndicator;
 
-    @BindView(R.id.reviews_error_textview)
+    @BindView(R.id.videos_error_textview)
     TextView mErrorTextView;
-
-    private ReviewsAdapter mReviewsAdapter;
 
     private Movies movie;
 
-    private List<String> mReviews;
+    private VideosAdapter mVideosAdapter;
+
+    private List<String> mVideos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reviews_list);
+        setContentView(R.layout.activity_videos_list);
         ButterKnife.bind(this);
 
         movie = getIntent().getParcelableExtra("parcel_data");
+
         intiViews();
 
         this.registerReceiver(mConnReceiver, new IntentFilter(
-                ConnectivityManager.CONNECTIVITY_ACTION));
+                        ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
@@ -67,8 +70,8 @@ public class ReviewsListActivity extends AppCompatActivity {
                     .getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 
             if (currentNetworkInfo.isConnected()) {
-                if (reviewsRecyclerView.getVisibility() == View.INVISIBLE) {
-                    loadReviewsList();
+                if (videosRecyclerView.getVisibility() == View.INVISIBLE) {
+                    loadVideosList();
                 }
             } else {
                 if (mErrorTextView.getVisibility() == View.INVISIBLE) {
@@ -89,34 +92,59 @@ public class ReviewsListActivity extends AppCompatActivity {
         RecyclerView.LayoutManager gridLayoutManager =
                 new GridLayoutManager(getApplicationContext(),1);
 
-        reviewsRecyclerView.setLayoutManager(gridLayoutManager);
+        videosRecyclerView.setLayoutManager(gridLayoutManager);
 
-        mReviewsAdapter = new ReviewsAdapter(this);
+        mVideosAdapter = new VideosAdapter(this, this);
 
-        reviewsRecyclerView.setAdapter(mReviewsAdapter);
+        videosRecyclerView.setAdapter(mVideosAdapter);
 
-        reviewsRecyclerView.setHasFixedSize(true);
+        videosRecyclerView.setHasFixedSize(true);
 
         showLoading();
 
-        loadReviewsList();
+        loadVideosList();
     }
 
-    private void loadReviewsList() {
+    private void loadVideosList() {
         if (isNetworkConnected()) {
-            showReviewsListView();
-
-            new ReviewsListActivity.FetchReviewsTask().execute(movie.getId());
+            new FetchVideosTask().execute(movie.getId());
         } else {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            reviewsRecyclerView.setVisibility(View.INVISIBLE);
+            videosRecyclerView.setVisibility(View.INVISIBLE);
             mErrorTextView.setText(getString(R.string.check_network_connection));
             mErrorTextView.setVisibility(View.VISIBLE);
         }
     }
 
+    @Override
+    public void onClick(int adapterPosition) {
+        URI uri = null;
+        try {
+            uri = new URI(mVideos.get(adapterPosition));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        String[] segments = new String[0];
+        if (uri != null) {
+            segments = uri.getPath().split("/");
+        }
+        String videoID = segments[segments.length - 2];
+        navigateToYoutube(videoID);
+    }
+
+    private void navigateToYoutube(String videoID) {
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoID));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + videoID));
+        try {
+            startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            startActivity(webIntent);
+        }
+    }
+
     @SuppressLint("StaticFieldLeak")
-    public class FetchReviewsTask extends AsyncTask<Integer, Void, List<String>> {
+    public class FetchVideosTask extends AsyncTask<Integer, Void, List<String>> {
 
         @Override
         protected void onPreExecute() {
@@ -132,41 +160,40 @@ public class ReviewsListActivity extends AppCompatActivity {
 
             Integer movieID = params[0];
 
-            URL reviewsUrl = NetworkUtils.getReviewsUrl(movieID, getApplicationContext());
+            URL videosUrl = NetworkUtils.getVideosUrl(movieID, getApplicationContext());
 
             try {
-                mReviews = MovieJsonUtils.getReviewsListFromURL(reviewsUrl);
-            }
-            catch (JSONException ex) {
-                Log.e(TAG, "doInBackground: Unexpected exception :" + ex.getMessage());
-                ex.printStackTrace();
+                mVideos = MovieJsonUtils.getVideosListFromURL(videosUrl);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
-            return mReviews;
+            return mVideos;
         }
 
         @Override
-        protected void onPostExecute(List<String> reviews) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (mReviews != null && mReviews.size() != 0) {
-                showReviewsListView();
-                mReviewsAdapter.setReviewsData(reviews);
+        protected void onPostExecute(List<String> strings) {
+            super.onPostExecute(strings);
+            if (mVideos != null && mVideos.size() != 0) {
+                showVideosListView();
+                mVideosAdapter.setVideosData(mVideos);
             } else {
                 mErrorTextView.setVisibility(View.VISIBLE);
-                mErrorTextView.setText(getString(R.string.no_reviews));
+                mErrorTextView.setText(getString(R.string.no_videos));
+                mLoadingIndicator.setVisibility(View.INVISIBLE);
             }
         }
     }
 
-    private void showReviewsListView() {
-        reviewsRecyclerView.setVisibility(View.VISIBLE);
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        mErrorTextView.setVisibility(View.INVISIBLE);
+    private void showLoading() {
+        videosRecyclerView.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
     }
 
-    private void showLoading() {
-        reviewsRecyclerView.setVisibility(View.INVISIBLE);
-        mLoadingIndicator.setVisibility(View.VISIBLE);
+    private void showVideosListView() {
+        videosRecyclerView.setVisibility(View.VISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
     }
 
     private boolean isNetworkConnected() {
@@ -175,7 +202,6 @@ public class ReviewsListActivity extends AppCompatActivity {
         } else {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             return false;
-
         }
     }
 }

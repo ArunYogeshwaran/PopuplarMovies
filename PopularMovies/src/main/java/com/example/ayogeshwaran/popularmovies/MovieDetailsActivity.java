@@ -2,6 +2,7 @@ package com.example.ayogeshwaran.popularmovies;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -9,10 +10,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,8 +50,38 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.favoriteButton)
     ImageButton favorite;
 
-    @BindView(R.id.scrollView2)
-    ScrollView scrollView;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.details_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.reviews:
+                navigateToReviewsList(movie);
+                return true;
+            case R.id.videos:
+                navigateToVideoList(movie);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void navigateToVideoList(Movies movie) {
+        Intent videoActivityIntent = new Intent(this, VideosListActivity.class);
+        videoActivityIntent.putExtra("parcel_data", movie);
+        startActivity(videoActivityIntent);
+    }
+
+    private void navigateToReviewsList(Movies movie) {
+        Intent reviewActivityIntent = new Intent(this, ReviewsListActivity.class);
+        reviewActivityIntent.putExtra("parcel_data", movie);
+        startActivity(reviewActivityIntent);
+    }
 
     private final int max_rating = 10;
 
@@ -90,6 +123,30 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
+//    @Override
+//    public void onSaveInstanceState(Bundle state) {
+//        super.onSaveInstanceState(state);
+//
+//        state.putParcelable(LIST_STATE_KEY, mListState);
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle state) {
+//        super.onRestoreInstanceState(state);
+//
+//        if(state != null) {
+//            mListState = state.getParcelable(LIST_STATE_KEY);
+//        }
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (mListState != null) {
+//            moviesRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+//        }
+//    }
+
     private boolean addMovieToDb() {
         ContentValues[] movieDetails = assignContentValues(movie);
         if (movie != null) {
@@ -121,6 +178,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 new String[] { String.valueOf(movie.getId()) },
                 null);
 
+        assert cursor != null;
         return cursor.getCount() > 0;
     }
 
@@ -175,15 +233,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void setValues(Movies movie) {
-        title.setText(movie.getTitle());
+        if (movie != null) {
+            title.setText(movie.getTitle());
 
-        Picasso.with(getApplicationContext()).load
-                (NetworkUtils.getFullPosterUrl(movie.getPosterPath())).into(poster);
+            Picasso.with(getApplicationContext()).load
+                    (NetworkUtils.getPosterUrl(movie.getPosterPath())).into(poster);
 
-        year.setText(movie.getReleaseDate());
+            year.setText(movie.getReleaseDate());
 
-        rating.setText(String.valueOf(movie.getVoteAverage()) + "/" + max_rating);
+            rating.setText(String.format("%s/%d", String.valueOf(movie.getVoteAverage()), max_rating));
 
-        description.setText(movie.getOverview());
+            description.setText(movie.getOverview());
+        }
     }
 }

@@ -6,7 +6,6 @@
     android:layout_height="match_parent">
 
     <ScrollView
-        android:id="@+id/scrollView2"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -15,9 +14,8 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/movieDetailsConstraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/title_textview"
@@ -36,130 +34,53 @@
 
             <ImageView
                 android:id="@+id/poster_imageview"
-                android:layout_width="114dp"
-                android:layout_height="174dp"
-                android:layout_marginLeft="8dp"
+                android:layout_width="134dp"
+                android:layout_height="217dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/title_textview"
                 app:srcCompat="@mipmap/ic_launcher"
-                tools:ignore="ContentDescription" />
+                tools:ignore="ContentDescription"
+                android:layout_marginLeft="8dp" />
 
             <TextView
                 android:id="@+id/year_textView"
                 android:layout_width="wrap_content"
-                android:layout_height="19dp"
-                android:layout_marginLeft="24dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="32dp"
+                android:textSize="24sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/poster_imageview"
-                app:layout_constraintTop_toBottomOf="@+id/title_textview" />
+                app:layout_constraintTop_toBottomOf="@+id/title_textview"
+                android:layout_marginLeft="24dp" />
 
             <TextView
                 android:id="@+id/rating_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="24dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
+                android:textSize="24sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/poster_imageview"
-                app:layout_constraintTop_toBottomOf="@+id/year_textView" />
+                app:layout_constraintTop_toBottomOf="@+id/year_textView"
+                android:layout_marginLeft="24dp" />
 
             <TextView
                 android:id="@+id/description_textView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/poster_imageview" />
-
-            <View
-                android:id="@+id/line1"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:background="@android:color/black"
+                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/description_textView" />
-
-            <TextView
-                android:id="@+id/trailer_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/trailers"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/line1" />
-
-            <ImageButton
-                android:id="@+id/play_Button1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/playtrailer"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/trailer_textView"
-                app:srcCompat="@drawable/ic_play_arrow_black_24dp"
-                tools:ignore="VectorDrawableCompat" />
-
-            <TextView
-                android:id="@+id/trailer1_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/trailer1"
-                app:layout_constraintStart_toEndOf="@+id/play_Button1"
-                app:layout_constraintTop_toTopOf="@+id/play_Button1" />
-
-            <View
-                android:id="@+id/line2"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@android:color/black"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/play_Button1" />
-
-            <ImageButton
-                android:id="@+id/play_Button2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/playtrailer"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/line2"
-                app:srcCompat="@drawable/ic_play_arrow_black_24dp"
-                tools:ignore="VectorDrawableCompat" />
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/trailer2"
-                app:layout_constraintStart_toEndOf="@+id/play_Button2"
-                app:layout_constraintTop_toTopOf="@+id/play_Button2" />
+                app:layout_constraintTop_toBottomOf="@+id/poster_imageview"
+                android:layout_marginRight="16dp"
+                android:layout_marginLeft="8dp" />
 
             <ImageButton
                 android:id="@+id/favoriteButton"
@@ -168,11 +89,14 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/description_textView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.16000003"
-                app:srcCompat="@drawable/ic_favorite_border_black_24px" />
+                app:layout_constraintVertical_bias="0.26999998"
+                app:srcCompat="@drawable/ic_favorite_border_black_24px"
+                tools:ignore="VectorDrawableCompat"
+                android:layout_marginRight="16dp"
+                android:contentDescription="@string/to_favorite" />
 
         </android.support.constraint.ConstraintLayout>
 

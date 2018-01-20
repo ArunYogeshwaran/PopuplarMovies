@@ -14,7 +14,7 @@ import java.util.List;
  * Created by ayogeshwaran on 14/01/18.
  */
 
-public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReiewsAdapterViewHolder> {
+public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsAdapterViewHolder> {
 
     private Context mContext;
 
@@ -25,17 +25,17 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReiewsAd
     }
 
     @Override
-    public ReiewsAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ReviewsAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         int layoutIdForListItem = R.layout.review_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View view = inflater.inflate(layoutIdForListItem, parent, false);
-        return new ReiewsAdapterViewHolder(view);
+        return new ReviewsAdapterViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ReiewsAdapterViewHolder holder, int position) {
+    public void onBindViewHolder(ReviewsAdapterViewHolder holder, int position) {
         String reviewText = null;
 
         if (mReviews != null) {
@@ -53,11 +53,11 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReiewsAd
         }
     }
 
-    class ReiewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ReviewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         final TextView reviewsText;
 
-        ReiewsAdapterViewHolder(View view) {
+        ReviewsAdapterViewHolder(View view) {
             super(view);
 
             reviewsText = (TextView) view.findViewById(R.id.text_cardview);
