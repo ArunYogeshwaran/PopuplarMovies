@@ -21,7 +21,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     private final Context mContext;
 
-    private List<Movies> movies;
+    private List<Movies> mMovies;
 
     /*
      * An interface is defined below to handle clicks on items within this Adapter. In the
@@ -49,21 +49,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
-        String posterPath = movies.get(position).getPosterPath();
+        String posterPath = null;
 
-        posterPath = NetworkUtils.getFullPosterUrl(posterPath);
-
-        Picasso.with(mContext).load
-                (posterPath).into(holder.moviePoster);
+        if (mMovies != null) {
+            posterPath = mMovies.get(position).getPosterPath();
+            posterPath = NetworkUtils.getPosterUrl(posterPath);
+            Picasso.with(mContext).load
+                    (posterPath).into(holder.moviePoster);
+        }
     }
 
     @Override
     public int getItemCount() {
-        if (movies == null) {
-            return 0;
-        } else {
-            return movies.size();
-        }
+        return mMovies != null ? mMovies.size() : 0;
     }
 
 
@@ -92,7 +90,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     }
 
     public void setMoviesData(List<Movies> movies) {
-        this.movies = movies;
+        if (mMovies != null) {
+            mMovies = null;
+        }
+        mMovies = movies;
         notifyDataSetChanged();
     }
 }

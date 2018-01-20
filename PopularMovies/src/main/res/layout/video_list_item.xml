@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_margin="10dp">
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        card_view:cardCornerRadius="5dp"
+        card_view:cardElevation="0dp"
+        android:layout_marginTop="10dp"
+        card_view:cardPreventCornerOverlap="false"
+        card_view:cardUseCompatPadding="true">
+
+        <ImageView
+            android:id="@+id/video_thumbnail_imageview"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            android:contentDescription="@string/video_thumbnail" />
+
+    </android.support.v7.widget.CardView>
+
+    <ImageButton
+        android:id="@+id/btnVideo_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:backgroundTint="@android:color/transparent"
+        android:scaleType="center"
+        android:focusable="false"
+        android:src="@drawable/ic_play_circle_outline_black_24dp"
+        android:visibility="visible"
+        tools:targetApi="lollipop"
+        android:contentDescription="@string/to_play_video" />
+
+</RelativeLayout>

@@ -104,6 +104,10 @@ public class Movies implements Parcelable {
         }
     };
 
+    public Movies() {
+
+    }
+
     public Integer getVoteCount() {
         return voteCount;
     }
