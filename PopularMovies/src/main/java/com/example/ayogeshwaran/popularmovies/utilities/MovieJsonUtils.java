@@ -41,12 +41,17 @@ public class MovieJsonUtils {
             ex.printStackTrace();
         }
 
-        JSONObject movieJson = new JSONObject(jsonMovieResponse);
-        JSONArray movieArray = movieJson.getJSONArray(RESULTS);
+        if (jsonMovieResponse != null) {
+            JSONObject movieJson = new JSONObject(jsonMovieResponse);
+            JSONArray movieArray = movieJson.getJSONArray(RESULTS);
 
-        Type listType = new TypeToken<List<Movies>>(){}.getType();
+            Type listType = new TypeToken<List<Movies>>(){}.getType();
 
-        return new Gson().fromJson(movieArray.toString(), listType);
+            return new Gson().fromJson(movieArray.toString(), listType);
+        } else {
+            // To handle any unforeseen errors
+            return new ArrayList<>();
+        }
     }
 
     public static List<String> getReviewsListFromURL(URL moviesRequestUrl) throws JSONException {
@@ -112,5 +117,4 @@ public class MovieJsonUtils {
 
         return videosList;
     }
-
 }
