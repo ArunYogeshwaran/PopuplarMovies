@@ -55,13 +55,13 @@ public class ReviewsListActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         movie = getIntent().getParcelableExtra("parcel_data");
-        intiViews();
+        initViews();
 
         this.registerReceiver(mConnReceiver, new IntentFilter(
                 ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             NetworkInfo currentNetworkInfo = intent
                     .getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -81,11 +81,15 @@ public class ReviewsListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mConnReceiver);
+        try {
+            unregisterReceiver(mConnReceiver);
+        } catch (Exception e) {
+            Log.i(TAG, "Exception - unregistering network broadcast receiver");
+        }
         super.onDestroy();
     }
 
-    private void intiViews() {
+    private void initViews() {
         RecyclerView.LayoutManager gridLayoutManager =
                 new GridLayoutManager(getApplicationContext(),1);
 
@@ -103,7 +107,7 @@ public class ReviewsListActivity extends AppCompatActivity {
     }
 
     private void loadReviewsList() {
-        if (isNetworkConnected()) {
+        if (NetworkUtils.isOnline(this)) {
             showReviewsListView();
 
             new ReviewsListActivity.FetchReviewsTask().execute(movie.getId());
@@ -121,7 +125,7 @@ public class ReviewsListActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
+            showLoading();
         }
 
         @Override
@@ -165,17 +169,8 @@ public class ReviewsListActivity extends AppCompatActivity {
     }
 
     private void showLoading() {
-        reviewsRecyclerView.setVisibility(View.INVISIBLE);
         mLoadingIndicator.setVisibility(View.VISIBLE);
-    }
-
-    private boolean isNetworkConnected() {
-        if (NetworkUtils.isOnline(getBaseContext())) {
-            return true;
-        } else {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            return false;
-
-        }
+        reviewsRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
     }
 }

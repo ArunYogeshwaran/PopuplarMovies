@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -58,13 +59,13 @@ public class VideosListActivity extends AppCompatActivity implements
 
         movie = getIntent().getParcelableExtra("parcel_data");
 
-        intiViews();
+        initViews();
 
         this.registerReceiver(mConnReceiver, new IntentFilter(
                         ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             NetworkInfo currentNetworkInfo = intent
                     .getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -84,11 +85,16 @@ public class VideosListActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mConnReceiver);
+        try {
+            unregisterReceiver(mConnReceiver);
+        } catch (Exception e) {
+            Log.i(this.getClass().getSimpleName(),
+                    "Exception - unregistering network broadcast receiver");
+        }
         super.onDestroy();
     }
 
-    private void intiViews() {
+    private void initViews() {
         RecyclerView.LayoutManager gridLayoutManager =
                 new GridLayoutManager(getApplicationContext(),1);
 
@@ -106,7 +112,7 @@ public class VideosListActivity extends AppCompatActivity implements
     }
 
     private void loadVideosList() {
-        if (isNetworkConnected()) {
+        if (NetworkUtils.isOnline(this)) {
             new FetchVideosTask().execute(movie.getId());
         } else {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -149,7 +155,7 @@ public class VideosListActivity extends AppCompatActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
+            showLoading();
         }
 
         @Override
@@ -187,6 +193,7 @@ public class VideosListActivity extends AppCompatActivity implements
 
     private void showLoading() {
         videosRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
         mLoadingIndicator.setVisibility(View.VISIBLE);
     }
 
@@ -194,14 +201,5 @@ public class VideosListActivity extends AppCompatActivity implements
         videosRecyclerView.setVisibility(View.VISIBLE);
         mErrorTextView.setVisibility(View.INVISIBLE);
         mLoadingIndicator.setVisibility(View.INVISIBLE);
-    }
-
-    private boolean isNetworkConnected() {
-        if (NetworkUtils.isOnline(getBaseContext())) {
-            return true;
-        } else {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            return false;
-        }
     }
 }

@@ -34,6 +34,7 @@ import com.example.ayogeshwaran.popularmovies.utilities.NetworkUtils;
 import org.json.JSONException;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -43,9 +44,16 @@ public class MoviesListActivity extends AppCompatActivity implements
         MoviesAdapter.IMoviesAdapterClickHandler, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int ID_MOVIE_LOADER = 33;
+
     private static final String LIST_STATE_KEY = "list_state_key";
 
-    private static boolean FAVORITE_VIEW = false;
+    private static final String POPULAR = NetworkUtils.POPULAR;
+
+    private static final String TOP_RATED = NetworkUtils.TOP_RATED;
+
+    private static final String FAVORITES = "favorites";
+
+    private static String CURRENT_VIEW = NetworkUtils.POPULAR;
 
     private final String TAG = MoviesListActivity.class.getSimpleName();
 
@@ -62,22 +70,53 @@ public class MoviesListActivity extends AppCompatActivity implements
 
     private List<Movies> mMovies;
 
-    private int mPosition = RecyclerView.NO_POSITION;
-
-    private Parcelable mListState;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movies_list);
-        ButterKnife.bind(this);
-        intiViews();
+        initViews();
+
+        if (savedInstanceState == null) {
+            loadMovies();
+        } else {
+            if (NetworkUtils.isOnline(this)) {
+                mMovies = savedInstanceState.getParcelableArrayList(LIST_STATE_KEY);
+                if (mMovies != null) {
+                    showMovieListView();
+                    mMoviesAdapter.setMoviesData(mMovies);
+                } else {
+                    loadMovies();
+                }
+            } else {
+                savedInstanceState.putParcelableArrayList(LIST_STATE_KEY, null);
+                showNoInternetMessage();
+            }
+        }
 
         this.registerReceiver(mConnReceiver, new IntentFilter(
                 ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+
+        // Save list state
+        bundle.putParcelableArrayList(LIST_STATE_KEY,
+                (ArrayList<? extends Parcelable>) mMovies);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            unregisterReceiver(mConnReceiver);
+        } catch (Exception e) {
+            Log.i(TAG, "Exception - unregistering network broadcast receiver");
+        }
+        super.onDestroy();
+    }
+
+    private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             NetworkInfo currentNetworkInfo = intent
                     .getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -95,14 +134,10 @@ public class MoviesListActivity extends AppCompatActivity implements
         }
     };
 
-    @Override
-    protected void onDestroy() {
-        unregisterReceiver(mConnReceiver);
-        super.onDestroy();
-    }
+    private void initViews() {
+        setContentView(R.layout.activity_movies_list);
+        ButterKnife.bind(this);
 
-
-    private void intiViews() {
         RecyclerView.LayoutManager gridLayoutManager =
                 new GridLayoutManager(getApplicationContext(),getSpanCount(getApplicationContext()));
 
@@ -113,14 +148,20 @@ public class MoviesListActivity extends AppCompatActivity implements
         moviesRecyclerView.setAdapter(mMoviesAdapter);
 
         moviesRecyclerView.setHasFixedSize(true);
+    }
 
+    private void loadMovies() {
         showLoading();
 
-        loadMoviesList(NetworkUtils.POPULAR);
+        if (!CURRENT_VIEW.equalsIgnoreCase(FAVORITES)) {
+            loadMoviesList(CURRENT_VIEW);
+        } else {
+            getFavoritesFromDb();
+        }
     }
 
     private void loadMoviesList(String sortOrder) {
-        if (isNetworkConnected()) {
+        if (NetworkUtils.isOnline(this)) {
             showMovieListView();
 
             switch (sortOrder) {
@@ -135,11 +176,15 @@ public class MoviesListActivity extends AppCompatActivity implements
                      break;
             }
         } else {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            moviesRecyclerView.setVisibility(View.INVISIBLE);
-            mErrorTextView.setText(getString(R.string.check_network_connection));
-            mErrorTextView.setVisibility(View.VISIBLE);
+            showNoInternetMessage();
         }
+    }
+
+    private void showNoInternetMessage() {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        moviesRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setText(getString(R.string.check_network_connection));
+        mErrorTextView.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {
@@ -149,7 +194,6 @@ public class MoviesListActivity extends AppCompatActivity implements
 
     private void showMovieListView() {
         moviesRecyclerView.setVisibility(View.VISIBLE);
-        moviesRecyclerView.smoothScrollToPosition(0);
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         mErrorTextView.setVisibility(View.INVISIBLE);
     }
@@ -166,15 +210,15 @@ public class MoviesListActivity extends AppCompatActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.most_popular:
-                FAVORITE_VIEW = false;
+                CURRENT_VIEW = POPULAR;
                 loadMoviesList(NetworkUtils.POPULAR);
                 return true;
             case R.id.highest_rated:
-                FAVORITE_VIEW = false;
+                CURRENT_VIEW = TOP_RATED;
                 loadMoviesList(NetworkUtils.TOP_RATED);
                 return true;
             case R.id.favorite:
-                FAVORITE_VIEW = true;
+                CURRENT_VIEW = FAVORITES;
                 getFavoritesFromDb();
                 return true;
 
@@ -206,35 +250,8 @@ public class MoviesListActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
-
-        // Save list state
-        mListState = moviesRecyclerView.getLayoutManager().onSaveInstanceState();
-        state.putParcelable(LIST_STATE_KEY, mListState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-
-        // Restore list state
-        if(state != null) {
-            mListState = state.getParcelable(LIST_STATE_KEY);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mListState != null) {
-            moviesRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
-        }
-    }
-
-    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (!FAVORITE_VIEW) {
+        if (!CURRENT_VIEW.equalsIgnoreCase(FAVORITES)) {
             return;
         }
 
@@ -244,8 +261,6 @@ public class MoviesListActivity extends AppCompatActivity implements
             setMoviesFromCursor(cursor);
             showMovieListView();
             mMoviesAdapter.setMoviesData(mMovies);
-            if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-            moviesRecyclerView.smoothScrollToPosition(mPosition);
         } else {
             moviesRecyclerView.setVisibility(View.INVISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -292,6 +307,9 @@ public class MoviesListActivity extends AppCompatActivity implements
                 movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(
                         MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)));
 
+                if (mMovies == null) {
+                    mMovies = new ArrayList<Movies>();
+                }
                 mMovies.add(movie);
             } while (cursor.moveToNext());
         }
@@ -303,7 +321,7 @@ public class MoviesListActivity extends AppCompatActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
+            showLoading();
         }
 
         @Override
@@ -334,16 +352,6 @@ public class MoviesListActivity extends AppCompatActivity implements
                 showMovieListView();
                 mMoviesAdapter.setMoviesData(movies);
             }
-        }
-    }
-
-    private boolean isNetworkConnected() {
-        if (NetworkUtils.isOnline(getBaseContext())) {
-            return true;
-        } else {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            return false;
-
         }
     }
 

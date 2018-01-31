@@ -123,30 +123,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
-//    @Override
-//    public void onSaveInstanceState(Bundle state) {
-//        super.onSaveInstanceState(state);
-//
-//        state.putParcelable(LIST_STATE_KEY, mListState);
-//    }
-//
-//    @Override
-//    protected void onRestoreInstanceState(Bundle state) {
-//        super.onRestoreInstanceState(state);
-//
-//        if(state != null) {
-//            mListState = state.getParcelable(LIST_STATE_KEY);
-//        }
-//    }
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        if (mListState != null) {
-//            moviesRecyclerView.getLayoutManager().onRestoreInstanceState(mListState);
-//        }
-//    }
-
     private boolean addMovieToDb() {
         ContentValues[] movieDetails = assignContentValues(movie);
         if (movie != null) {
