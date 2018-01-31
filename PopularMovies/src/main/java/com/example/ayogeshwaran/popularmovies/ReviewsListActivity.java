@@ -8,8 +8,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,6 +24,7 @@ import com.example.ayogeshwaran.popularmovies.utilities.NetworkUtils;
 import org.json.JSONException;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -32,6 +33,8 @@ import butterknife.ButterKnife;
 public class ReviewsListActivity extends AppCompatActivity {
 
     private static final String TAG = ReviewsListActivity.class.getSimpleName();
+
+    private static final String LIST_STATE_KEY = "list_state_key";
 
     @BindView(R.id.reviewsRecyclerview)
     RecyclerView reviewsRecyclerView;
@@ -57,8 +60,34 @@ public class ReviewsListActivity extends AppCompatActivity {
         movie = getIntent().getParcelableExtra("parcel_data");
         initViews();
 
+        if (savedInstanceState == null) {
+            loadReviewsList();
+        } else {
+            mReviews = savedInstanceState.getStringArrayList(LIST_STATE_KEY);
+            if (mReviews != null) {
+                if (mReviews.size() != 0) {
+                    showReviewsListView();
+                    mReviewsAdapter.setReviewsData(mReviews);
+                } else {
+                    mErrorTextView.setVisibility(View.VISIBLE);
+                    mErrorTextView.setText(getString(R.string.no_reviews));
+                }
+            } else {
+                loadReviewsList();
+            }
+        }
+
         this.registerReceiver(mConnReceiver, new IntentFilter(
                 ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+
+        // Save list state
+        bundle.putStringArrayList(LIST_STATE_KEY, (ArrayList<String>) mReviews);
+
     }
 
     private final BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
@@ -100,10 +129,6 @@ public class ReviewsListActivity extends AppCompatActivity {
         reviewsRecyclerView.setAdapter(mReviewsAdapter);
 
         reviewsRecyclerView.setHasFixedSize(true);
-
-        showLoading();
-
-        loadReviewsList();
     }
 
     private void loadReviewsList() {
