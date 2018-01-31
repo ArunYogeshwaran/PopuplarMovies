@@ -14,4 +14,6 @@
     <string name="to_favorite">To Favorite</string>
     <string name="to_play_video">To play video</string>
     <string name="video_thumbnail">Video Thumbnail</string>
+    <string name="favorite_removed">Favorite removed</string>
+    <string name="favorite_added">Favorite added</string>
 </resources>

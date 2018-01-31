@@ -137,7 +137,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
 
             if (added > 0) {
-                Toast.makeText(getApplicationContext(), "Favorite added",
+                Toast.makeText(getApplicationContext(), R.string.favorite_added,
                         Toast.LENGTH_SHORT).show();
                 return true;
             } else {
@@ -167,7 +167,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
 
             if (deleted > 0) {
-                Toast.makeText(getApplicationContext(), "Favorite removed",
+                Toast.makeText(getApplicationContext(), R.string.favorite_removed,
                         Toast.LENGTH_SHORT).show();
                 return true;
             }
